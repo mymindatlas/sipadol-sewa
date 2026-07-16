@@ -8,7 +8,7 @@ import {
   type TurnstileWidgetHandle,
 } from '@/components/auth/turnstile-widget'
 
-import { loginUser, type AuthFormState } from './actions'
+import { requestPasswordReset, type AuthFormState } from './actions'
 
 const initialState: AuthFormState = {
   success: false,
@@ -16,18 +16,21 @@ const initialState: AuthFormState = {
   error: '',
 }
 
-export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(loginUser, initialState)
+export default function ResetPasswordPage() {
+  const [state, formAction, isPending] = useActionState(
+    requestPasswordReset,
+    initialState
+  )
   const turnstileRef = useRef<TurnstileWidgetHandle>(null)
   const [captchaToken, setCaptchaToken] = useState('')
 
-  // Turnstile tokens are single-use: a failed attempt spends the token, so
-  // the widget must be reset or the retry fails with a captcha error instead
-  // of the real one (PRD §12.3). reset() clears captchaToken via onVerify('')
-  // and the re-run challenge delivers the fresh token the same way; the
-  // submit button stays disabled in between.
+  // Turnstile tokens are single-use: any completed submission — failed or
+  // successful — spends the token, so reset the widget before the next try.
+  // reset() clears captchaToken via onVerify('') and the re-run challenge
+  // delivers the fresh token the same way; the submit button stays disabled
+  // in between.
   useEffect(() => {
-    if (state.error) {
+    if (state.error || state.success) {
       turnstileRef.current?.reset()
     }
   }, [state])
@@ -39,9 +42,10 @@ export default function LoginPage() {
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-blue-700">
             Sipadol Sewa
           </p>
-          <h1 className="text-2xl font-semibold">Welcome back</h1>
+          <h1 className="text-2xl font-semibold">Reset your password</h1>
           <p className="text-sm text-slate-600">
-            Sign in to access ward notices, complaints, and service updates.
+            Enter your email address and we will send you a link to set a new
+            password.
           </p>
         </div>
 
@@ -61,29 +65,6 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="password" className="text-sm font-medium text-slate-700">
-                Password
-              </label>
-              <Link
-                href="/reset-password"
-                className="text-sm font-semibold text-blue-700 hover:text-blue-800"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-              placeholder="Enter your password"
-            />
-          </div>
-
           <TurnstileWidget ref={turnstileRef} onVerify={setCaptchaToken} />
           <input type="hidden" name="captchaToken" value={captchaToken} />
 
@@ -93,19 +74,25 @@ export default function LoginPage() {
             </p>
           ) : null}
 
+          {state.success && state.message ? (
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+              {state.message}
+            </p>
+          ) : null}
+
           <button
             type="submit"
             disabled={isPending || !captchaToken}
             className="w-full rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-blue-400"
           >
-            {isPending ? 'Signing in...' : 'Log in'}
+            {isPending ? 'Sending link...' : 'Send reset link'}
           </button>
         </form>
 
         <p className="text-sm text-slate-600">
-          New here?{' '}
-          <Link href="/signup" className="font-semibold text-blue-700 hover:text-blue-800">
-            Create an account
+          Remembered it?{' '}
+          <Link href="/login" className="font-semibold text-blue-700 hover:text-blue-800">
+            Back to login
           </Link>
         </p>
       </div>
