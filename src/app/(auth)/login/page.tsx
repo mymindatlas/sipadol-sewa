@@ -1,9 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 
-import { loginUser, type AuthFormState } from '@/app/auth/actions'
+import {
+  TurnstileWidget,
+  type TurnstileWidgetHandle,
+} from '@/components/auth/turnstile-widget'
+
+import { loginUser, type AuthFormState } from './actions'
 
 const initialState: AuthFormState = {
   success: false,
@@ -13,6 +18,19 @@ const initialState: AuthFormState = {
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(loginUser, initialState)
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null)
+  const [captchaToken, setCaptchaToken] = useState('')
+
+  // Turnstile tokens are single-use: a failed attempt spends the token, so
+  // the widget must be reset or the retry fails with a captcha error instead
+  // of the real one (PRD §12.3). reset() clears captchaToken via onVerify('')
+  // and the re-run challenge delivers the fresh token the same way; the
+  // submit button stays disabled in between.
+  useEffect(() => {
+    if (state.error) {
+      turnstileRef.current?.reset()
+    }
+  }, [state])
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900">
@@ -58,6 +76,9 @@ export default function LoginPage() {
             />
           </div>
 
+          <TurnstileWidget ref={turnstileRef} onVerify={setCaptchaToken} />
+          <input type="hidden" name="captchaToken" value={captchaToken} />
+
           {state.error ? (
             <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               {state.error}
@@ -66,7 +87,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || !captchaToken}
             className="w-full rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-blue-400"
           >
             {isPending ? 'Signing in...' : 'Log in'}

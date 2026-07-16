@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
-import { createClient } from '@/utils/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 
 export type AuthFormState = {
   success: boolean
@@ -30,51 +30,17 @@ function formatAuthError(error: { message?: string; code?: string }) {
     return 'Please confirm your email before signing in.'
   }
 
+  if (message.includes('captcha')) {
+    return 'Human verification failed. Please complete the check and try again.'
+  }
+
   return error.message || 'We could not complete that request right now. Please try again.'
-}
-
-export async function signUpUser(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const email = formData.get('email')?.toString().trim() ?? ''
-  const password = formData.get('password')?.toString() ?? ''
-
-  if (!email || !password) {
-    return {
-      success: false,
-      error: 'Please enter both your email and password.',
-    }
-  }
-
-  if (password.length < 6) {
-    return {
-      success: false,
-      error: 'Password must be at least 6 characters long.',
-    }
-  }
-
-  const supabase = await createClient()
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-  })
-
-  if (error) {
-    return {
-      success: false,
-      error: formatAuthError(error),
-    }
-  }
-
-  revalidatePath('/')
-
-  return {
-    success: true,
-    message: 'Check your email to confirm your account before logging in.',
-  }
 }
 
 export async function loginUser(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const email = formData.get('email')?.toString().trim() ?? ''
   const password = formData.get('password')?.toString() ?? ''
+  const captchaToken = formData.get('captchaToken')?.toString() ?? ''
 
   if (!email || !password) {
     return {
@@ -87,6 +53,9 @@ export async function loginUser(_prevState: AuthFormState, formData: FormData): 
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
+    options: {
+      captchaToken: captchaToken || undefined,
+    },
   })
 
   if (error) {

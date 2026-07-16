@@ -1,9 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import { useActionState } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 
-import { signUpUser, type AuthFormState } from '@/app/auth/actions'
+import {
+  TurnstileWidget,
+  type TurnstileWidgetHandle,
+} from '@/components/auth/turnstile-widget'
+
+import { signUpUser, type AuthFormState } from './actions'
 
 const initialState: AuthFormState = {
   success: false,
@@ -13,6 +18,19 @@ const initialState: AuthFormState = {
 
 export default function SignUpPage() {
   const [state, formAction, isPending] = useActionState(signUpUser, initialState)
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null)
+  const [captchaToken, setCaptchaToken] = useState('')
+
+  // Turnstile tokens are single-use: any completed submission — failed or
+  // successful — spends the token, so reset the widget before the next try.
+  // reset() clears captchaToken via onVerify('') and the re-run challenge
+  // delivers the fresh token the same way; the submit button stays disabled
+  // in between.
+  useEffect(() => {
+    if (state.error || state.success) {
+      turnstileRef.current?.reset()
+    }
+  }, [state])
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900">
@@ -28,6 +46,36 @@ export default function SignUpPage() {
         </div>
 
         <form action={formAction} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="full_name" className="text-sm font-medium text-slate-700">
+              Full name
+            </label>
+            <input
+              id="full_name"
+              name="full_name"
+              type="text"
+              autoComplete="name"
+              required
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              placeholder="Your full name"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="phone" className="text-sm font-medium text-slate-700">
+              Phone number
+            </label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              required
+              className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              placeholder="98XXXXXXXX"
+            />
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium text-slate-700">
               Email address
@@ -58,6 +106,9 @@ export default function SignUpPage() {
             />
           </div>
 
+          <TurnstileWidget ref={turnstileRef} onVerify={setCaptchaToken} />
+          <input type="hidden" name="captchaToken" value={captchaToken} />
+
           {state.error ? (
             <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               {state.error}
@@ -72,7 +123,7 @@ export default function SignUpPage() {
 
           <button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || !captchaToken}
             className="w-full rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-blue-400"
           >
             {isPending ? 'Creating account...' : 'Create account'}
