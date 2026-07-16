@@ -94,3 +94,8 @@ Server Actions live in `actions.ts` beside the page that calls them.
 - **Ask me for real credentials** when you need them. Never invent placeholder keys and carry on.
 - Verify with `npm run build` and `npm run lint` before calling anything done.
 - The five ward services are not yet named (PRD §39). Use the placeholder ids in `src/lib/schemas/services/` and ask before inventing fields.
+
+## Conventions
+
+Build mobile-first: design at 375px first, then layer md: / lg:. 
+Most residents will use this on a phone, not a laptop.
