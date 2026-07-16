@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { AccountMenu } from '@/components/layout/account-menu'
 import { LanguageToggle } from '@/components/layout/language-toggle'
 import { getLang, type Lang } from '@/lib/i18n'
 import { roleFromClaims, STAFF_ROLES, type UserRole } from '@/lib/roles'
@@ -31,6 +32,7 @@ const STRINGS = {
     en: 'Ward No. 8, Suryabinayak Municipality',
   },
   signIn: { ne: 'साइन इन', en: 'Sign in' },
+  signOut: { ne: 'साइन आउट', en: 'Sign out' },
   admin: { ne: 'व्यवस्थापन', en: 'Admin' },
 } satisfies Record<string, Record<Lang, string>>
 
@@ -60,16 +62,11 @@ export async function SiteHeader() {
           <LanguageToggle lang={lang} />
 
           {role ? (
-            <div className="text-right">
-              {fullName && (
-                <span className="block max-w-[9rem] truncate text-xs font-semibold text-slate-800">
-                  {fullName}
-                </span>
-              )}
-              <span className="block text-[11px] text-emerald-700">
-                {ROLE_LABELS[role][lang]}
-              </span>
-            </div>
+            <AccountMenu
+              fullName={fullName}
+              roleLabel={ROLE_LABELS[role][lang]}
+              signOutLabel={STRINGS.signOut[lang]}
+            />
           ) : (
             <Link
               href="/login"
