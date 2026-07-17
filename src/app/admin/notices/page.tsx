@@ -11,24 +11,6 @@ import { CategoryManager } from './category-manager'
 // category management on the same page. Reads run as the signed-in staff
 // user; the "notices_select_staff" policy is what makes drafts visible.
 
-type NoticeRow = {
-  id: number
-  title_ne: string
-  title_en: string
-  is_published: boolean
-  published_at: string | null
-  created_at: string
-  notice_categories: { name_ne: string; name_en: string } | null
-}
-
-type CategoryRow = {
-  id: number
-  name_ne: string
-  name_en: string
-  display_order: number
-  is_active: boolean
-}
-
 export default async function AdminNoticesPage() {
   const supabase = await createClient()
 
@@ -38,13 +20,11 @@ export default async function AdminNoticesPage() {
       .select(
         'id, title_ne, title_en, is_published, published_at, created_at, notice_categories(name_ne, name_en)'
       )
-      .order('created_at', { ascending: false })
-      .returns<NoticeRow[]>(),
+      .order('created_at', { ascending: false }),
     supabase
       .from('notice_categories')
       .select('id, name_ne, name_en, display_order, is_active')
-      .order('display_order', { ascending: true })
-      .returns<CategoryRow[]>(),
+      .order('display_order', { ascending: true }),
   ])
 
   return (

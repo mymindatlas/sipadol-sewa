@@ -11,15 +11,6 @@ import { NoticeList, type NoticeListItem } from './notice-list'
 // policy "notices_select_published" is what actually guarantees drafts
 // are excluded, for every caller, regardless of what any page asks for.
 
-type NoticeRow = {
-  id: number
-  title_ne: string
-  title_en: string
-  published_at: string | null
-  category_id: number
-  notice_categories: { name_ne: string; name_en: string } | null
-}
-
 export async function generateMetadata(): Promise<Metadata> {
   const lang = await getLang()
   return buildMetadata({
@@ -43,7 +34,6 @@ export default async function NoticesPage() {
     )
     .eq('is_published', true)
     .order('published_at', { ascending: false })
-    .returns<NoticeRow[]>()
 
   const items: NoticeListItem[] = (notices ?? []).map((notice) => ({
     id: notice.id,

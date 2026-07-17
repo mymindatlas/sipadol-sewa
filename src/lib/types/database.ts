@@ -162,6 +162,68 @@ export type Database = {
         }
         Relationships: []
       }
+      representatives: {
+        Row: {
+          bio_en: string
+          bio_ne: string
+          created_at: string
+          created_by: string
+          display_order: number
+          email: string | null
+          full_name_en: string
+          full_name_ne: string
+          id: number
+          is_active: boolean
+          phone: string | null
+          photo_public_id: string | null
+          role_en: string
+          role_ne: string
+          updated_at: string
+        }
+        Insert: {
+          bio_en: string
+          bio_ne: string
+          created_at?: string
+          created_by?: string
+          display_order?: number
+          email?: string | null
+          full_name_en: string
+          full_name_ne: string
+          id?: never
+          is_active?: boolean
+          phone?: string | null
+          photo_public_id?: string | null
+          role_en: string
+          role_ne: string
+          updated_at?: string
+        }
+        Update: {
+          bio_en?: string
+          bio_ne?: string
+          created_at?: string
+          created_by?: string
+          display_order?: number
+          email?: string | null
+          full_name_en?: string
+          full_name_ne?: string
+          id?: never
+          is_active?: boolean
+          phone?: string | null
+          photo_public_id?: string | null
+          role_en?: string
+          role_ne?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "representatives_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

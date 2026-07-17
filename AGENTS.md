@@ -99,3 +99,13 @@ Server Actions live in `actions.ts` beside the page that calls them.
 
 Build mobile-first: design at 375px first, then layer md: / lg:. 
 Most residents will use this on a phone, not a laptop.
+
+### Primary key types
+Public content tables (notices, gallery, directory, representatives, 
+programs, services) use bigint — readable URLs, nothing to protect.
+
+Private-data tables (complaints, forms, program_registrations, and their 
+*_status_events) use uuid default gen_random_uuid(). Residents never see 
+these IDs — they see ticket_id/token — so there's no UX cost, and a 
+guessed ID isn't enough on its own. RLS is still the enforcement; this 
+is a second lock, not a replacement.

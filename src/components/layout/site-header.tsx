@@ -16,6 +16,7 @@ const NAV_ITEMS: { href: string; ne: string; en: string }[] = [
   { href: '/forms', ne: 'सेवा फारम', en: 'Services' },
   { href: '/complaints/tracker', ne: 'गुनासो', en: 'Complaints' },
   { href: '/programs', ne: 'कार्यक्रम', en: 'Programmes' },
+  { href: '/representatives', ne: 'जनप्रतिनिधि', en: 'Representatives' },
   { href: '/dashboard', ne: 'जवाफदेहिता', en: 'Accountability' },
 ]
 

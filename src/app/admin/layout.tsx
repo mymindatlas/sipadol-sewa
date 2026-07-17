@@ -13,6 +13,7 @@ import { getCurrentRole, STAFF_ROLES } from '@/lib/roles'
 const NAV = [
   { href: '/admin', label: 'Overview' },
   { href: '/admin/notices', label: 'Notices · सूचना' },
+  { href: '/admin/representatives', label: 'Representatives · जनप्रतिनिधि' },
 ]
 
 export default async function AdminLayout({
