@@ -22,6 +22,15 @@ export type UploadPurposeConfig = {
   preset: string | undefined
   /** Destination folder. Server-fixed — the browser cannot influence it. */
   folder: string
+  /**
+   * Incoming transformation, applied by Cloudinary BEFORE the asset is
+   * stored (Decision 7). The stored asset IS the normalized one — there is
+   * no full-res original behind it, so there is no strip-the-transformation
+   * path in the URL back to an EXIF-laden original, and storage is capped at
+   * the source. Signed like folder/preset, so the browser can neither choose
+   * it nor tamper with it in transit.
+   */
+  transformation: string
   /** Read decision (Decision 7). Independent of the fact that we sign. */
   delivery: UploadDelivery
   /**
@@ -44,6 +53,10 @@ export const UPLOAD_PURPOSES = {
   representative_photo: {
     preset: process.env.CLOUDINARY_UPLOAD_PRESET_PUBLIC,
     folder: 'sipadol/public/representatives',
+    // Cap the stored asset at 2000px on its longest side (c_limit only
+    // shrinks — a smaller upload is left alone) and re-encode at q_auto:good.
+    // Applied before storage, so this normalized asset is the original.
+    transformation: 'c_limit,w_2000,q_auto:good',
     delivery: 'public',
     // No svg: SVGs can carry embedded JavaScript and these are delivered
     // publicly, so a stored SVG would be a stored-XSS vector.
@@ -69,6 +82,7 @@ export type SignedUpload = {
   api_key: string
   cloud_name: string
   folder: string
+  transformation: string
   preset: string
 }
 
@@ -99,6 +113,7 @@ export function signUpload(purpose: UploadPurpose): SignedUpload {
   const paramsToSign: Record<string, string | number> = {
     folder: config.folder,
     timestamp,
+    transformation: config.transformation,
     upload_preset: config.preset,
   }
 
@@ -117,6 +132,7 @@ export function signUpload(purpose: UploadPurpose): SignedUpload {
     api_key: API_KEY,
     cloud_name: CLOUD_NAME,
     folder: config.folder,
+    transformation: config.transformation,
     preset: config.preset,
   }
 }

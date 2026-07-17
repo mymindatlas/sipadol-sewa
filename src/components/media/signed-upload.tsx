@@ -17,6 +17,7 @@ type SignResponse = {
   api_key: string
   cloud_name: string
   folder: string
+  transformation: string
   preset: string
 }
 
@@ -92,14 +93,16 @@ export function SignedUpload({
       const signed = (await signRes.json()) as SignResponse
 
       // 3. Post the file directly to Cloudinary. The signed params must be
-      //    sent back exactly as signed (folder, timestamp, upload_preset);
-      //    api_key rides along unsigned as Cloudinary requires.
+      //    sent back exactly as signed (folder, timestamp, transformation,
+      //    upload_preset) or the signature check fails; api_key rides along
+      //    unsigned as Cloudinary requires.
       const form = new FormData()
       form.append('file', file)
       form.append('api_key', signed.api_key)
       form.append('timestamp', String(signed.timestamp))
       form.append('signature', signed.signature)
       form.append('folder', signed.folder)
+      form.append('transformation', signed.transformation)
       form.append('upload_preset', signed.preset)
 
       const uploaded = await postToCloudinary(
