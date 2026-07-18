@@ -56,7 +56,7 @@ export const UPLOAD_PURPOSES = {
     // Cap the stored asset at 2000px on its longest side (c_limit only
     // shrinks — a smaller upload is left alone) and re-encode at q_auto:good.
     // Applied before storage, so this normalized asset is the original.
-    transformation: 'c_limit,w_2000,q_auto:good',
+    transformation: 'c_limit,w_2000,h_2000,q_auto:good',
     delivery: 'public',
     // No svg: SVGs can carry embedded JavaScript and these are delivered
     // publicly, so a stored SVG would be a stored-XSS vector.
@@ -73,7 +73,7 @@ export function isUploadPurpose(value: unknown): value is UploadPurpose {
 }
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-const API_KEY = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY
+const API_KEY = process.env.CLOUDINARY_API_KEY
 const API_SECRET = process.env.CLOUDINARY_API_SECRET
 
 export type SignedUpload = {
