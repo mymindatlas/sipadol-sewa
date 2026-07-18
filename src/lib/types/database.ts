@@ -39,6 +39,104 @@ export type Database = {
   }
   public: {
     Tables: {
+      gallery_albums: {
+        Row: {
+          cover_photo_id: number | null
+          created_at: string
+          created_by: string
+          display_order: number
+          id: number
+          is_published: boolean
+          slug: string
+          title_en: string
+          title_ne: string
+          updated_at: string
+          year_bs: number
+        }
+        Insert: {
+          cover_photo_id?: number | null
+          created_at?: string
+          created_by?: string
+          display_order?: number
+          id?: never
+          is_published?: boolean
+          slug: string
+          title_en: string
+          title_ne: string
+          updated_at?: string
+          year_bs: number
+        }
+        Update: {
+          cover_photo_id?: number | null
+          created_at?: string
+          created_by?: string
+          display_order?: number
+          id?: never
+          is_published?: boolean
+          slug?: string
+          title_en?: string
+          title_ne?: string
+          updated_at?: string
+          year_bs?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_albums_cover_photo_id_fkey"
+            columns: ["cover_photo_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_photos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gallery_albums_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gallery_photos: {
+        Row: {
+          album_id: number
+          caption_en: string | null
+          caption_ne: string | null
+          created_at: string
+          display_order: number
+          id: number
+          photo_public_id: string
+          updated_at: string
+        }
+        Insert: {
+          album_id: number
+          caption_en?: string | null
+          caption_ne?: string | null
+          created_at?: string
+          display_order?: number
+          id?: never
+          photo_public_id: string
+          updated_at?: string
+        }
+        Update: {
+          album_id?: number
+          caption_en?: string | null
+          caption_ne?: string | null
+          created_at?: string
+          display_order?: number
+          id?: never
+          photo_public_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gallery_photos_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "gallery_albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notice_categories: {
         Row: {
           created_at: string
