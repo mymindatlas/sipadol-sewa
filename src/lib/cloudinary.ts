@@ -64,6 +64,18 @@ export const UPLOAD_PURPOSES = {
     maxBytes: 8 * 1024 * 1024,
     requiresStaff: true,
   },
+  // Mirrors representative_photo exactly except for the folder: staff-uploaded
+  // public images, served through a transformation that strips EXIF and caps
+  // the stored size (Decision 7, §18). Same no-svg reasoning as above.
+  gallery_photo: {
+    preset: process.env.CLOUDINARY_UPLOAD_PRESET_PUBLIC,
+    folder: 'sipadol/public/gallery',
+    transformation: 'c_limit,w_2000,h_2000,q_auto:good',
+    delivery: 'public',
+    formats: ['jpg', 'jpeg', 'png', 'webp'],
+    maxBytes: 8 * 1024 * 1024,
+    requiresStaff: true,
+  },
 } as const satisfies Record<string, UploadPurposeConfig>
 
 export type UploadPurpose = keyof typeof UPLOAD_PURPOSES

@@ -14,6 +14,7 @@ const NAV = [
   { href: '/admin', label: 'Overview' },
   { href: '/admin/notices', label: 'Notices · सूचना' },
   { href: '/admin/representatives', label: 'Representatives · जनप्रतिनिधि' },
+  { href: '/admin/gallery', label: 'Gallery · ग्यालरी' },
 ]
 
 export default async function AdminLayout({
