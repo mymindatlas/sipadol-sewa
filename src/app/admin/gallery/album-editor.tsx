@@ -115,7 +115,9 @@ export function AlbumEditor({ action, initial }: Props) {
             className={inputClass}
           />
           <span className="mt-1 block text-xs text-slate-500">
-            lowercase ASCII used in the web address, e.g. dashain-2082
+            यो एल्बमको वेब ठेगानामा देखिन्छ। साना अंग्रेजी अक्षर, अंक र जोड्ने
+            चिन्ह (-) मात्र प्रयोग गर्नुहोस् — खाली ठाउँ वा नेपाली नलेख्नुहोस्।
+            उदाहरण: dashain-2082
           </span>
         </label>
         <label className="block text-sm">
