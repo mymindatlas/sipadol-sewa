@@ -13,11 +13,12 @@ import { createClient } from '@/lib/supabase/server'
 const NAV_ITEMS: { href: string; ne: string; en: string }[] = [
   { href: '/', ne: 'गृहपृष्ठ', en: 'Home' },
   { href: '/notices', ne: 'सूचना', en: 'Notices' },
+  { href: '/programs', ne: 'कार्यक्रम', en: 'Programmes' },
   { href: '/forms', ne: 'सेवा फारम', en: 'Services' },
   { href: '/complaints/tracker', ne: 'गुनासो', en: 'Complaints' },
-  { href: '/programs', ne: 'कार्यक्रम', en: 'Programmes' },
-  { href: '/representatives', ne: 'जनप्रतिनिधि', en: 'Representatives' },
   { href: '/dashboard', ne: 'जवाफदेहिता', en: 'Accountability' },
+  { href: '/gallery', ne: 'ग्यालरी', en: 'Gallery' },
+  { href: '/representatives', ne: 'जनप्रतिनिधि', en: 'Representatives' },
 ]
 
 const ROLE_LABELS: Record<UserRole, { ne: string; en: string }> = {

@@ -58,7 +58,12 @@ function toBikramSambat({ year, month, day }: KtmParts): NepaliDate {
 
 const NE_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९']
 
-function toNepaliDigits(value: string): string {
+/**
+ * Devanagari digits for an already-formatted string. Pure text substitution
+ * — no calendar logic — so it is also the right tool for numbers that are
+ * not dates at all (a Bikram Sambat year label, a photo count).
+ */
+export function toNepaliDigits(value: string): string {
   return value.replace(/\d/g, (d) => NE_DIGITS[Number(d)])
 }
 
