@@ -111,6 +111,7 @@ export function AlbumEditor({ action, initial }: Props) {
           <input
             name="slug"
             defaultValue={initial?.slug}
+            placeholder="dashain-2082"
             required
             className={inputClass}
           />

@@ -1,16 +1,9 @@
 import { ConfirmSubmitButton } from '@/components/admin/confirm-submit-button'
 import { CloudinaryImage } from '@/components/media/cloudinary-image'
-import { SignedUpload } from '@/components/media/signed-upload'
 import { createClient } from '@/lib/supabase/server'
 
-import { addPhoto, deletePhoto, setCover, updatePhoto } from '../actions'
-
-// Client-side mirror of the server's gallery_photo constraints
-// (src/lib/cloudinary.ts), used only for the local fast-fail and the file
-// picker's accept list. The server re-checks all of this — this copy is UX,
-// never the gate, so a drift here weakens nothing.
-const PHOTO_FORMATS = ['jpg', 'jpeg', 'png', 'webp'] as const
-const PHOTO_MAX_BYTES = 8 * 1024 * 1024
+import { deletePhoto, setCover, updatePhoto } from '../actions'
+import { MultiPhotoUpload } from './multi-photo-upload'
 
 const inputClass =
   'w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none'
@@ -40,69 +33,9 @@ export async function PhotoManager({ albumId, coverPhotoId }: Props) {
         Photos · तस्बिरहरू
       </h2>
 
-      {/* §32.2 — one photo at a time. Keying the form on the current photo
-          count remounts SignedUpload after a successful add, clearing its
-          preview so the next upload starts from an empty picker. */}
-      <form
-        key={list.length}
-        action={addPhoto}
-        className="space-y-4 rounded-xl border border-slate-200 bg-white p-4"
-      >
-        <div>
-          <h3 className="text-sm font-bold text-slate-700">फोटो थप्नुहोस्</h3>
-          <p className="mt-1 text-xs text-slate-500">
-            एक पटकमा एउटा फोटो थपिन्छ। फोटो छान्नुहोस्, क्याप्सन लेख्नुहोस्, अनि
-            &ldquo;Add photo&rdquo; थिच्नुहोस्। (Photos are added one at a
-            time.)
-          </p>
-        </div>
-
-        <input type="hidden" name="album_id" value={albumId} />
-
-        <SignedUpload
-          purpose="gallery_photo"
-          formats={PHOTO_FORMATS}
-          maxBytes={PHOTO_MAX_BYTES}
-          name="photo_public_id"
-          label="फोटो (Photo)"
-        />
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">
-              क्याप्सन (Caption, Nepali)
-            </span>
-            <input name="caption_ne" className={inputClass} />
-          </label>
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">
-              Caption (English)
-            </span>
-            <input name="caption_en" className={inputClass} />
-          </label>
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium text-slate-700">
-              Display order · क्रम
-            </span>
-            <input
-              name="display_order"
-              type="number"
-              defaultValue={0}
-              className={inputClass}
-            />
-            <span className="mt-1 block text-xs text-slate-500">
-              Lower numbers appear first in the album.
-            </span>
-          </label>
-        </div>
-
-        <button
-          type="submit"
-          className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
-        >
-          Add photo
-        </button>
-      </form>
+      {/* Batch add. Captions are not collected here on purpose — they are
+          authored per photo in the grid below, after the files land. */}
+      <MultiPhotoUpload albumId={albumId} />
 
       {list.length === 0 ? (
         <p className="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
