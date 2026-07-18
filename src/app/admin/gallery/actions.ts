@@ -100,14 +100,21 @@ export async function createAlbum(
   const supabase = await createClient()
   // No cover_photo_id — a new album has no cover. The cover is designated
   // from photos already in the album, in the photo manager.
-  const { error } = await supabase.from('gallery_albums').insert(parsed.fields)
+  const { data, error } = await supabase
+    .from('gallery_albums')
+    .insert(parsed.fields)
+    .select('id')
+    .single()
 
   if (error) {
     return { error: `Could not create the album: ${error.message}` }
   }
 
   revalidateGalleryPaths()
-  redirect('/admin/gallery')
+  // Land on the new album's own page: it holds the photo uploader, and an
+  // album with no photos is the whole reason the operator is here. If the id
+  // did not come back (RLS hid the returned row), the list still works.
+  redirect(data ? `/admin/gallery/${data.id}` : '/admin/gallery')
 }
 
 export async function updateAlbum(
@@ -155,22 +162,33 @@ export async function deleteAlbum(formData: FormData): Promise<void> {
 // on gallery_photos is the enforcement; these run as the signed-in user.
 // ---------------------------------------------------------------------------
 
+// Unlike the other photo actions, addPhoto reports back. Its caller is a
+// batch loop that must decide per file whether to count a success, and an
+// insert that fails silently would be counted as one — the photo would sit
+// in Cloudinary with no row and the operator would see only a short grid.
+// Returned as a value, not thrown, matching how this file surfaces errors.
+export type AddPhotoResult = { ok: true } | { ok: false; error: string }
+
 // §32.2 — one photo at a time. The public_id has already been signed, posted
-// to Cloudinary and handed back by SignedUpload; this only records the row.
-export async function addPhoto(formData: FormData): Promise<void> {
+// to Cloudinary and handed back by the uploader; this only records the row.
+export async function addPhoto(formData: FormData): Promise<AddPhotoResult> {
   const album_id = Number(formData.get('album_id'))
-  if (!Number.isInteger(album_id)) return
+  if (!Number.isInteger(album_id)) {
+    return { ok: false, error: 'Missing album id.' }
+  }
 
   const photo_public_id = formData.get('photo_public_id')?.toString().trim()
   // Nothing uploaded — the operator submitted an empty picker.
-  if (!photo_public_id) return
+  if (!photo_public_id) {
+    return { ok: false, error: 'No photo was uploaded.' }
+  }
 
   const caption_ne = formData.get('caption_ne')?.toString().trim() || null
   const caption_en = formData.get('caption_en')?.toString().trim() || null
   const display_order = Number(formData.get('display_order') ?? 0)
 
   const supabase = await createClient()
-  await supabase.from('gallery_photos').insert({
+  const { error } = await supabase.from('gallery_photos').insert({
     album_id,
     photo_public_id,
     caption_ne,
@@ -178,7 +196,13 @@ export async function addPhoto(formData: FormData): Promise<void> {
     display_order: Number.isInteger(display_order) ? display_order : 0,
   })
 
+  if (error) {
+    // RLS refusal and constraint violation both land here.
+    return { ok: false, error: error.message }
+  }
+
   revalidateAlbumPaths(album_id)
+  return { ok: true }
 }
 
 export async function updatePhoto(formData: FormData): Promise<void> {

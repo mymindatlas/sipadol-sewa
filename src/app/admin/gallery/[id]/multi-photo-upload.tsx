@@ -100,7 +100,14 @@ export function MultiPhotoUpload({ albumId }: { albumId: number }) {
     const action = new FormData()
     action.append('album_id', String(albumId))
     action.append('photo_public_id', publicId)
-    await addPhoto(action)
+    const result = await addPhoto(action)
+
+    // The bytes reached Cloudinary but the row did not reach the database —
+    // an RLS refusal or a constraint violation. That is a failed photo, not a
+    // succeeded one: without this the batch would report a success the
+    // operator cannot see in the grid. Rethrown so it joins the other five
+    // failure modes in the loop's skip-and-report below, unchanged.
+    if (!result.ok) throw new Error(result.error)
   }
 
   async function handleFiles(files: File[]) {
