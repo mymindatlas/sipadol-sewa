@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 
@@ -96,6 +97,13 @@ export default async function AlbumDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-5">
+      <Link
+        href="/gallery"
+        className="inline-block text-sm font-medium text-slate-600 hover:text-blue-800 hover:underline"
+      >
+        {lang === 'ne' ? '← ग्यालरीमा फर्कनुहोस्' : '← Back to gallery'}
+      </Link>
+
       <header className="space-y-1">
         <p className="text-sm font-medium text-blue-800">
           {formatYearBs(album.year_bs, lang)}

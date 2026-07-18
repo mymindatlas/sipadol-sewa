@@ -131,6 +131,33 @@ export async function updateRepresentative(
   redirect('/admin/representatives')
 }
 
+// Same one-click gesture as the notices and gallery toggles, but is_active is
+// NOT a publish flag: it records whether this person currently holds the post.
+// A former ward secretary is deactivated, not unpublished — so the wording
+// here and on the button stays "activate/deactivate" throughout (§32.4).
+export async function toggleRepresentativeActive(
+  formData: FormData
+): Promise<void> {
+  const id = Number(formData.get('id'))
+  if (!Number.isInteger(id)) return
+
+  const supabase = await createClient()
+
+  const { data: rep } = await supabase
+    .from('representatives')
+    .select('is_active')
+    .eq('id', id)
+    .maybeSingle()
+  if (!rep) return
+
+  await supabase
+    .from('representatives')
+    .update({ is_active: !rep.is_active })
+    .eq('id', id)
+
+  revalidateRepPaths()
+}
+
 export async function deleteRepresentative(formData: FormData): Promise<void> {
   const id = Number(formData.get('id'))
   if (!Number.isInteger(id)) return

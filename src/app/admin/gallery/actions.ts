@@ -145,6 +145,30 @@ export async function updateAlbum(
   redirect('/admin/gallery')
 }
 
+// One-click publish/unpublish from the list (§32.2), mirroring notices. The
+// difference from toggleNoticePublished: gallery_albums has no published_at
+// column, so there is nothing to stamp — the flag is the whole state.
+export async function toggleAlbumPublished(formData: FormData): Promise<void> {
+  const id = Number(formData.get('id'))
+  if (!Number.isInteger(id)) return
+
+  const supabase = await createClient()
+
+  const { data: album } = await supabase
+    .from('gallery_albums')
+    .select('is_published')
+    .eq('id', id)
+    .maybeSingle()
+  if (!album) return
+
+  await supabase
+    .from('gallery_albums')
+    .update({ is_published: !album.is_published })
+    .eq('id', id)
+
+  revalidateGalleryPaths()
+}
+
 export async function deleteAlbum(formData: FormData): Promise<void> {
   const id = Number(formData.get('id'))
   if (!Number.isInteger(id)) return

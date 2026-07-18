@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { ConfirmSubmitButton } from '@/components/admin/confirm-submit-button'
 import { createClient } from '@/lib/supabase/server'
 
-import { deleteAlbum } from './actions'
+import { deleteAlbum, toggleAlbumPublished } from './actions'
 
 // §32.2 — all albums including drafts (staff RLS). Reads run as the
 // signed-in staff user; "gallery_albums_select_staff" is what makes
@@ -82,6 +82,15 @@ export default async function AdminGalleryPage() {
                     >
                       Edit
                     </Link>
+                    <form action={toggleAlbumPublished}>
+                      <input type="hidden" name="id" value={album.id} />
+                      <button
+                        type="submit"
+                        className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      >
+                        {album.is_published ? 'Unpublish' : 'Publish'}
+                      </button>
+                    </form>
                     <form action={deleteAlbum}>
                       <input type="hidden" name="id" value={album.id} />
                       <ConfirmSubmitButton

@@ -4,7 +4,7 @@ import { ConfirmSubmitButton } from '@/components/admin/confirm-submit-button'
 import { CloudinaryImage } from '@/components/media/cloudinary-image'
 import { createClient } from '@/lib/supabase/server'
 
-import { deleteRepresentative } from './actions'
+import { deleteRepresentative, toggleRepresentativeActive } from './actions'
 
 // §32.4 — all representatives including inactive (staff RLS). Reads run as
 // the signed-in staff user; "representatives_select_staff" is what makes
@@ -100,6 +100,15 @@ export default async function AdminRepresentativesPage() {
                     >
                       Edit
                     </Link>
+                    <form action={toggleRepresentativeActive}>
+                      <input type="hidden" name="id" value={rep.id} />
+                      <button
+                        type="submit"
+                        className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                      >
+                        {rep.is_active ? 'Deactivate' : 'Activate'}
+                      </button>
+                    </form>
                     <form action={deleteRepresentative}>
                       <input type="hidden" name="id" value={rep.id} />
                       <ConfirmSubmitButton
