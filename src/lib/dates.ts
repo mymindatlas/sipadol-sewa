@@ -91,6 +91,52 @@ export function formatDate(input: string | Date, lang: Lang): string {
 }
 
 /**
+ * Calendar date only — for `date` COLUMNS (programme dates, migration 0011),
+ * which arrive as a bare 'YYYY-MM-DD' with no time and no timezone.
+ *
+ * Deliberately NOT formatDate: that one takes a timestamptz instant and must
+ * resolve the Kathmandu wall-clock date before formatting. A calendar date
+ * has no instant to resolve. Handing '2083-04-05' to new Date() would parse
+ * it as midnight UTC, and ktmParts would then add +05:45 — arithmetic on a
+ * point in time that the value never denoted. The parts are split out of the
+ * string and used as written instead, so the day rendered is always the day
+ * stored.
+ */
+export function formatDateOnly(input: string, lang: Lang): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input?.trim() ?? '')
+  if (!match) return ''
+
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+
+  // Noon, matching toBikramSambat: keeps any boundary arithmetic away from
+  // midnight. No timeZone is involved — the components go in as written.
+  const date = new Date(year, month - 1, day, 12)
+  // Rejects a well-formed but impossible date (2083-02-31 rolls over to
+  // March, so the components no longer match what was asked for).
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    return ''
+  }
+
+  if (lang === 'ne') {
+    return new NepaliDate(date).format('D MMMM YYYY', 'np')
+  }
+
+  // No timeZone option: the Date carries local components and is formatted
+  // in the same local zone, so the parts round-trip unshifted.
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date)
+}
+
+/**
  * Date + wall-clock time in Kathmandu — for complaint timestamps, status
  * events, and anywhere the hour matters.
  */
