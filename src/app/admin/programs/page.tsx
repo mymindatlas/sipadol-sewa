@@ -97,6 +97,12 @@ export default async function AdminProgramsPage() {
                     >
                       Edit
                     </Link>
+                    <Link
+                      href={`/admin/programs/${program.id}/registrations`}
+                      className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                    >
+                      Registrations
+                    </Link>
                     <form action={toggleProgramPublished}>
                       <input type="hidden" name="id" value={program.id} />
                       <button
