@@ -260,6 +260,113 @@ export type Database = {
         }
         Relationships: []
       }
+      program_registrations: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string
+          id: number
+          note: string | null
+          phone: string
+          program_id: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name: string
+          id?: never
+          note?: string | null
+          phone: string
+          program_id: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: never
+          note?: string | null
+          phone?: string
+          program_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_registrations_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "programs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "program_registrations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      programs: {
+        Row: {
+          banner_public_id: string | null
+          created_at: string
+          created_by: string
+          description_en: string
+          description_ne: string
+          end_date: string | null
+          id: number
+          is_published: boolean
+          registration_deadline: string | null
+          registration_open: boolean
+          start_date: string
+          title_en: string
+          title_ne: string
+          updated_at: string
+        }
+        Insert: {
+          banner_public_id?: string | null
+          created_at?: string
+          created_by?: string
+          description_en: string
+          description_ne: string
+          end_date?: string | null
+          id?: never
+          is_published?: boolean
+          registration_deadline?: string | null
+          registration_open?: boolean
+          start_date: string
+          title_en: string
+          title_ne: string
+          updated_at?: string
+        }
+        Update: {
+          banner_public_id?: string | null
+          created_at?: string
+          created_by?: string
+          description_en?: string
+          description_ne?: string
+          end_date?: string | null
+          id?: never
+          is_published?: boolean
+          registration_deadline?: string | null
+          registration_open?: boolean
+          start_date?: string
+          title_en?: string
+          title_ne?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "programs_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       representatives: {
         Row: {
           bio_en: string
@@ -340,6 +447,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      program_is_open: { Args: { p_program_id: number }; Returns: boolean }
     }
     Enums: {
       complaint_status:
