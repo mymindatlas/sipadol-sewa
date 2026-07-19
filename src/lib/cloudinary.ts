@@ -76,6 +76,18 @@ export const UPLOAD_PURPOSES = {
     maxBytes: 8 * 1024 * 1024,
     requiresStaff: true,
   },
+  // Programme banners. Identical to gallery_photo but for the folder, so the
+  // two are separable in Cloudinary — a banner is not an album photo, and a
+  // shared folder would misdescribe both.
+  program_banner: {
+    preset: process.env.CLOUDINARY_UPLOAD_PRESET_PUBLIC,
+    folder: 'sipadol/public/programs',
+    transformation: 'c_limit,w_2000,h_2000,q_auto:good',
+    delivery: 'public',
+    formats: ['jpg', 'jpeg', 'png', 'webp'],
+    maxBytes: 8 * 1024 * 1024,
+    requiresStaff: true,
+  },
 } as const satisfies Record<string, UploadPurposeConfig>
 
 export type UploadPurpose = keyof typeof UPLOAD_PURPOSES
