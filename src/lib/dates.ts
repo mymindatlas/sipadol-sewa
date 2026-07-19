@@ -137,6 +137,31 @@ export function formatDateOnly(input: string, lang: Lang): string {
 }
 
 /**
+ * Today's calendar date in Kathmandu as 'YYYY-MM-DD'.
+ *
+ * The counterpart to formatDateOnly. `date` columns hold calendar days, so
+ * "has this programme finished?" and "has the deadline passed?" have to be
+ * asked about the calendar day in the WARD's timezone, not the server's —
+ * the two disagree for 5h45m of every day, which is enough to close
+ * registration early or file a programme under the wrong heading. Returned
+ * as a string because ISO 'YYYY-MM-DD' orders correctly under plain text
+ * comparison, so callers use < and >= and never build a Date at all.
+ */
+export function todayInKathmandu(): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? ''
+
+  return `${get('year')}-${get('month')}-${get('day')}`
+}
+
+/**
  * Date + wall-clock time in Kathmandu — for complaint timestamps, status
  * events, and anywhere the hour matters.
  */

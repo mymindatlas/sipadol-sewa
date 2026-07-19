@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { CloudinaryImage } from '@/components/media/cloudinary-image'
-import { formatDateOnly } from '@/lib/dates'
+import { formatDateOnly, todayInKathmandu } from '@/lib/dates'
 import { getLang, localized, type Lang } from '@/lib/i18n'
 import { buildMetadata } from '@/lib/metadata'
 import { createClient } from '@/lib/supabase/server'
@@ -34,29 +34,6 @@ type ProgramRow = {
   end_date: string | null
   registration_open: boolean
   registration_deadline: string | null
-}
-
-/**
- * Today in Kathmandu as 'YYYY-MM-DD'. The programme columns are `date`, so
- * "has it finished?" is a calendar-day question and both sides of the
- * comparison must be calendar days in the SAME place — the ward's. Comparing
- * a Date built on the server (which may be hosted anywhere) against a bare
- * date string would put a programme in the wrong section for the 5h45m the
- * two calendars disagree. ISO 'YYYY-MM-DD' sorts correctly as plain text, so
- * string comparison is the whole of the date maths here.
- */
-function todayInKathmandu(): string {
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Kathmandu',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(new Date())
-
-  const get = (type: Intl.DateTimeFormatPartTypes) =>
-    parts.find((p) => p.type === type)?.value ?? ''
-
-  return `${get('year')}-${get('month')}-${get('day')}`
 }
 
 /** The last day a programme occupies: its end, or its start if it is one day. */
