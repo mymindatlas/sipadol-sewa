@@ -128,20 +128,17 @@ export async function createProgram(
   const supabase = await createClient()
   // No created_by — the column defaults to auth.uid() (migration 0011), so
   // the author is recorded by the database rather than trusted from the form.
-  const { data, error } = await supabase
-    .from('programs')
-    .insert(parsed.fields)
-    .select('id')
-    .single()
+  const { error } = await supabase.from('programs').insert(parsed.fields)
 
   if (error) {
     return { error: `Could not create the programme: ${error.message}` }
   }
 
   revalidateProgramPaths()
-  // Land on the new programme's own page, matching createAlbum. If the id did
-  // not come back (RLS hid the returned row), the list still works.
-  redirect(data ? `/admin/programs/${data.id}` : '/admin/programs')
+  // Land on the list. Unlike an album — which exists to hold photos uploaded
+  // on its own page — a programme is complete once created, so there is
+  // nothing waiting on the new row's page and no need to read its id back.
+  redirect('/admin/programs')
 }
 
 export async function updateProgram(
