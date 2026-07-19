@@ -34,7 +34,7 @@ export default async function AdminLayout({
       {/* Sidebar on lg; compact top bar on mobile */}
       <aside className="shrink-0 border-b border-slate-200 bg-slate-900 text-slate-100 lg:min-h-screen lg:w-60 lg:border-b-0">
         <div className="px-4 py-3 lg:py-5">
-          <p className="text-sm font-bold tracking-tight">सिपादोल सेवा</p>
+          <p className="text-sm font-bold tracking-tight">सिपाडोल सेवा</p>
           <p className="text-[11px] text-slate-400">
             Ward Administration
             {role === 'admin' ? ' · Admin' : ' · Ward Secretary'}

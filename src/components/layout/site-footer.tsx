@@ -10,7 +10,7 @@ const STRINGS = {
     en: 'Suryabinayak Municipality, Bhaktapur',
   },
   tagline: {
-    ne: 'सिपादोल सेवा — तपाईंको वडा, तपाईंको सेवा',
+    ne: 'सिपाडोल सेवा — तपाईंको वडा, तपाईंको सेवा',
     en: 'Sipadol Sewa — your ward, your services',
   },
 } satisfies Record<string, Record<Lang, string>>

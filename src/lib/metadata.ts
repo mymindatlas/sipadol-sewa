@@ -6,7 +6,7 @@ import type { Metadata } from 'next'
 // (a notice attachment, a gallery cover) pass it in; everything else falls
 // back to the ward's default card.
 
-export const SITE_NAME = 'सिपादोल सेवा — Sipadol Sewa'
+export const SITE_NAME = 'सिपाडोल सेवा — Sipadol Sewa'
 
 const DEFAULT_DESCRIPTION =
   'वडा नं. ८, सूर्यविनायक नगरपालिकाको आधिकारिक सेवा पोर्टल — सूचना, सिफारिस, गुनासो र कार्यक्रम। ' +

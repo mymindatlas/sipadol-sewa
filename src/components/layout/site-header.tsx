@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import { AccountMenu } from '@/components/layout/account-menu'
 import { LanguageToggle } from '@/components/layout/language-toggle'
+import { SiteNav } from '@/components/layout/site-nav'
 import { getLang, type Lang } from '@/lib/i18n'
 import { roleFromClaims, STAFF_ROLES, type UserRole } from '@/lib/roles'
 import { createClient } from '@/lib/supabase/server'
@@ -28,7 +29,11 @@ const ROLE_LABELS: Record<UserRole, { ne: string; en: string }> = {
 }
 
 const STRINGS = {
-  brand: { ne: 'सिपादोल सेवा', en: 'Sipadol Sewa' },
+  // The brand is stored as its two words rather than one string, so each can
+  // be coloured without splitting on whitespace at render time — a split that
+  // would quietly mis-colour the day someone edits the name.
+  brandFirst: { ne: 'सिपाडोल', en: 'Sipadol' },
+  brandSecond: { ne: 'सेवा', en: 'Sewa' },
   ward: {
     ne: 'वडा नं. ८, सूर्यविनायक नगरपालिका',
     en: 'Ward No. 8, Suryabinayak Municipality',
@@ -52,8 +57,13 @@ export async function SiteHeader() {
     <header className="border-b border-slate-200 bg-white">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
         <Link href="/" className="min-w-0">
-          <span className="block truncate text-lg font-bold tracking-tight text-blue-800">
-            {STRINGS.brand[lang]}
+          {/* Two-tone wordmark: the place name in the deeper blue, the service
+              word in the brighter one. Weight and size carry the identity;
+              the colour pair is the only ornament, which is about as much as
+              a government masthead should have. */}
+          <span className="block truncate text-xl font-bold tracking-tight sm:text-2xl">
+            <span className="text-blue-900">{STRINGS.brandFirst[lang]}</span>{' '}
+            <span className="text-blue-600">{STRINGS.brandSecond[lang]}</span>
           </span>
           <span className="block truncate text-[11px] text-slate-500">
             {STRINGS.ward[lang]}
@@ -64,10 +74,18 @@ export async function SiteHeader() {
           <LanguageToggle lang={lang} />
 
           {role ? (
+            // The staff check stays here, on the server, where the claims
+            // are. AccountMenu receives a link or nothing — never a role to
+            // branch on. It renders on every page, so this is the one route
+            // into /admin that survives the homepage, where SiteNav is null.
             <AccountMenu
               fullName={fullName}
               roleLabel={ROLE_LABELS[role][lang]}
               signOutLabel={STRINGS.signOut[lang]}
+              adminHref={STAFF_ROLES.includes(role) ? '/admin' : undefined}
+              adminLabel={
+                STAFF_ROLES.includes(role) ? STRINGS.admin[lang] : undefined
+              }
             />
           ) : (
             <Link
@@ -80,32 +98,16 @@ export async function SiteHeader() {
         </div>
       </div>
 
-      {/* Nav scrolls horizontally at 375px; no hamburger needed for a
-          six-item list. */}
-      <nav className="border-t border-slate-100">
-        <ul className="mx-auto flex max-w-5xl gap-1 overflow-x-auto px-2 py-1.5">
-          {NAV_ITEMS.map((item) => (
-            <li key={item.href} className="shrink-0">
-              <Link
-                href={item.href}
-                className="block rounded-md px-2.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-blue-800"
-              >
-                {item[lang]}
-              </Link>
-            </li>
-          ))}
-          {role && STAFF_ROLES.includes(role) && (
-            <li className="shrink-0">
-              <Link
-                href="/admin"
-                className="block rounded-md px-2.5 py-1.5 text-sm font-semibold text-blue-800 hover:bg-blue-50"
-              >
-                {STRINGS.admin[lang]}
-              </Link>
-            </li>
-          )}
-        </ul>
-      </nav>
+      {/* Localized here, on the server; SiteNav only decides which one is
+          active. Admin is deliberately NOT in this list — it belongs to the
+          account, not to the ward's content, and this row disappears on the
+          homepage. */}
+      <SiteNav
+        items={NAV_ITEMS.map((item) => ({
+          href: item.href,
+          label: item[lang],
+        }))}
+      />
     </header>
   )
 }

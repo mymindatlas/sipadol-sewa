@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 
 import { signOut } from './actions'
@@ -8,13 +9,33 @@ type Props = {
   fullName: string | null
   roleLabel: string
   signOutLabel: string
+  /**
+   * Staff destination. Present ONLY when the server has already decided the
+   * viewer is staff — this component performs no role check of its own, and
+   * `undefined` is the entire instruction to render nothing. The role never
+   * crosses to the client, so the browser has nothing to tamper with; and
+   * even if it did, admin/layout.tsx re-checks the role live and every RLS
+   * policy calls current_role(). This link is an affordance, not a gate.
+   */
+  adminHref?: string
+  adminLabel?: string
 }
 
 // The signed-in account chip. At 375px a dropdown beats stacking more
 // items into the header row: the trigger stays one compact element, and
 // role + sign-out live in the menu. /account joins the menu when PRD §36
 // is built.
-export function AccountMenu({ fullName, roleLabel, signOutLabel }: Props) {
+//
+// The Admin link lives HERE rather than in the nav row because this menu
+// renders on every page — including the homepage, where SiteNav returns null
+// and a staff member would otherwise have no visible route into /admin.
+export function AccountMenu({
+  fullName,
+  roleLabel,
+  signOutLabel,
+  adminHref,
+  adminLabel,
+}: Props) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -67,6 +88,18 @@ export function AccountMenu({ fullName, roleLabel, signOutLabel }: Props) {
               )}
               <p className="text-xs text-emerald-700">{roleLabel}</p>
             </div>
+            {adminHref && adminLabel && (
+              // Above sign-out and visually separated: a staff action, not a
+              // routine one. Keeps the blue accent the nav Admin link carried.
+              <Link
+                href={adminHref}
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="block border-b border-slate-100 px-3 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-50"
+              >
+                {adminLabel}
+              </Link>
+            )}
             <form action={signOut}>
               <button
                 type="submit"
