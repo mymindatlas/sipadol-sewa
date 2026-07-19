@@ -31,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
   })
 }
 
-const NOTICE_LIMIT = 5
+const NOTICE_LIMIT = 3
 const PROGRAM_LIMIT = 3
 const REPRESENTATIVE_LIMIT = 3
 
@@ -46,19 +46,104 @@ type ProgramRow = {
   registration_deadline: string | null
 }
 
-// §11 — "Your Resident Services". Only what a resident can actually do today.
-// Submit a Complaint (/complaints/new) and Services & Forms (/forms) belong
-// here and are deliberately ABSENT until those phases ship: the front door of
-// an accountability system cannot lead with a card that 404s or bounces to
-// login without saying why. Add them back with their routes, not before.
-const SERVICE_SHORTCUTS = [
+// Only the icon chip carries the accent. Eight fully tinted cards would read
+// as decoration competing for attention; a ward portal wants a resident to
+// find the one thing they came for, so the colour is a landmark, not a mood.
+const ACCENT_CHIP = {
+  blue: 'bg-blue-50 text-blue-700',
+  indigo: 'bg-indigo-50 text-indigo-700',
+  teal: 'bg-teal-50 text-teal-700',
+  amber: 'bg-amber-50 text-amber-700',
+  green: 'bg-emerald-50 text-emerald-700',
+  purple: 'bg-purple-50 text-purple-700',
+  rose: 'bg-rose-50 text-rose-700',
+  slate: 'bg-slate-100 text-slate-600',
+} as const
+
+type NavCard = {
+  href: string
+  icon: string
+  label_ne: string
+  label_en: string
+  hint_ne: string
+  hint_en: string
+  accent: keyof typeof ACCENT_CHIP
+}
+
+// §11 — the nav hub. Every destination the ward offers, in one grid: the front
+// page IS the navigation rather than a preview of it.
+const NAV_CARDS: NavCard[] = [
   {
     href: '/notices',
     icon: '📢',
     label_ne: 'सूचना',
     label_en: 'Notices',
-    hint_ne: 'वडाका जानकारी',
+    hint_ne: 'वडाका सूचना',
     hint_en: 'Ward announcements',
+    accent: 'blue',
+  },
+  {
+    href: '/programs',
+    icon: '📅',
+    label_ne: 'कार्यक्रम',
+    label_en: 'Programmes',
+    hint_ne: 'कार्यक्रम र दर्ता',
+    hint_en: 'Events & registration',
+    accent: 'indigo',
+  },
+  {
+    href: '/forms',
+    icon: '📝',
+    label_ne: 'सेवा',
+    label_en: 'Services',
+    hint_ne: 'सेवाका लागि आवेदन',
+    hint_en: 'Apply for ward services',
+    accent: 'teal',
+  },
+  {
+    href: '/complaints/tracker',
+    icon: '📬',
+    label_ne: 'गुनासो',
+    label_en: 'Complaints',
+    hint_ne: 'समस्या दर्ता गर्नुहोस्',
+    hint_en: 'Report an issue',
+    accent: 'amber',
+  },
+  {
+    href: '/dashboard',
+    icon: '📊',
+    label_ne: 'जवाफदेहिता',
+    label_en: 'Accountability',
+    hint_ne: 'प्रगति हेर्नुहोस्',
+    hint_en: 'Track resolutions',
+    accent: 'green',
+  },
+  {
+    href: '/gallery',
+    icon: '🖼️',
+    label_ne: 'ग्यालरी',
+    label_en: 'Gallery',
+    hint_ne: 'वडाका तस्बिर',
+    hint_en: 'Ward photos',
+    accent: 'purple',
+  },
+  {
+    href: '/representatives',
+    icon: '👥',
+    label_ne: 'जनप्रतिनिधि',
+    label_en: 'Representatives',
+    hint_ne: 'वडा पदाधिकारी',
+    hint_en: 'Ward officials',
+    accent: 'rose',
+  },
+  {
+    href: '/about',
+    icon: 'ℹ️',
+    label_ne: 'बारेमा र सम्पर्क',
+    label_en: 'About & Contact',
+    hint_ne: 'वडाको जानकारी र सम्पर्क',
+    hint_en: 'Ward info & contact',
+    accent: 'slate',
   },
 ]
 
@@ -138,8 +223,8 @@ export default async function HomePage() {
   return (
     <div className="space-y-10">
       {/* ── Hero ───────────────────────────────────────────────────── */}
-      <section className="space-y-4">
-        <div className="rounded-2xl bg-gradient-to-br from-blue-800 to-blue-900 px-5 py-7 text-white sm:px-7 sm:py-9">
+      <section>
+        <div className="rounded-2xl bg-gradient-to-br from-blue-800 to-blue-900 px-5 py-5 text-white sm:px-7 sm:py-6">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-200">
             {lang === 'ne'
               ? 'सूर्यविनायक नगरपालिका'
@@ -147,50 +232,46 @@ export default async function HomePage() {
           </p>
           <h1 className="mt-2 text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
             {lang === 'ne'
-              ? 'वडा नं. ८ — सिपादोल'
+              ? 'वडा नं. ८ — सिपाडोल'
               : 'Ward No. 8 — Sipadol'}
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-blue-100 sm:text-base">
             {lang === 'ne'
-              ? 'तपाईंको वडाको आधिकारिक सेवा पोर्टलमा स्वागत छ। सूचना पढ्नुहोस्, सेवाका लागि आवेदन दिनुहोस्, गुनासो दर्ता गर्नुहोस् — र हरेक गुनासोको अवस्था जो कोहीले हेर्न सक्नुहुन्छ।'
-              : 'Welcome to your ward’s official service portal. Read notices, apply for services, and file a complaint — and anyone can follow the status of every complaint.'}
+              ? 'तपाईंको वडाको आधिकारिक पोर्टलमा स्वागत छ। तलका सेवाहरूमध्ये छान्नुहोस् — सूचना पढ्न, कार्यक्रममा सहभागी हुन, ग्यालरी हेर्न वा जनप्रतिनिधिसम्म पुग्न। वडा नं. ८ का सबै सेवा एकै ठाउँमा।'
+              : 'Welcome to your ward’s official portal. Choose a service below to read notices, join programmes, view the gallery, or reach your representatives — everything Ward No. 8 offers, in one place.'}
           </p>
         </div>
+      </section>
 
-        {/* Service shortcuts — the primary actions, sized for a thumb. */}
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {SERVICE_SHORTCUTS.map((shortcut) => (
-            <li key={shortcut.href}>
+      {/* ── Nav hub ────────────────────────────────────────────────── */}
+      {/* No heading: this block is the navigation, not a preview of a list
+          that lives elsewhere, so a "See all" would point at itself. */}
+      <section>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {NAV_CARDS.map((card) => (
+            <li key={card.href}>
               <Link
-                href={shortcut.href}
-                className="flex h-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-blue-300 hover:bg-blue-50/50"
+                href={card.href}
+                className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 transition hover:border-blue-300 hover:bg-blue-50/50"
               >
-                <span
-                  aria-hidden
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xl"
-                >
-                  {shortcut.icon}
+                <span className="flex items-center gap-2.5">
+                  <span
+                    aria-hidden
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl ${ACCENT_CHIP[card.accent]}`}
+                  >
+                    {card.icon}
+                  </span>
+                  <span className="min-w-0 font-semibold leading-tight text-slate-900">
+                    {lang === 'ne' ? card.label_ne : card.label_en}
+                  </span>
                 </span>
-                <span className="min-w-0">
-                  <span className="block font-semibold leading-tight text-slate-900">
-                    {lang === 'ne' ? shortcut.label_ne : shortcut.label_en}
-                  </span>
-                  <span className="block text-xs text-slate-500">
-                    {lang === 'ne' ? shortcut.hint_ne : shortcut.hint_en}
-                  </span>
+                <span className="mt-2 block text-xs leading-snug text-slate-500">
+                  {lang === 'ne' ? card.hint_ne : card.hint_en}
                 </span>
               </Link>
             </li>
           ))}
         </ul>
-      </section>
-
-      {/* ── Emergency contacts ─────────────────────────────────────── */}
-      <section className="space-y-3">
-        <SectionHeading
-          title={lang === 'ne' ? 'आपतकालीन सम्पर्क' : 'Emergency Contacts'}
-        />
-        <EmergencyContacts lang={lang} />
       </section>
 
       {/* ── Latest notices ─────────────────────────────────────────── */}
@@ -297,6 +378,21 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* ── Accountability (placeholder) ───────────────────────────── */}
+      {/* Decision 9 / §11 — the resolution rate is the point of this system,
+          so the section is reserved here rather than added later as an
+          afterthought. No link while there is nothing behind it. */}
+      <section className="space-y-3">
+        <SectionHeading
+          title={lang === 'ne' ? 'जवाफदेहिता' : 'Accountability'}
+        />
+        <p className="rounded-xl border border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
+          {lang === 'ne'
+            ? 'गुनासो समाधानका तथ्याङ्क यहाँ चाँडै देखिनेछन्।'
+            : 'Complaint resolution statistics will appear here soon.'}
+        </p>
+      </section>
+
       {/* ── Representatives preview ────────────────────────────────── */}
       <section className="space-y-3">
         <SectionHeading
@@ -349,6 +445,19 @@ export default async function HomePage() {
             })}
           </ul>
         )}
+      </section>
+
+      {/* ── Emergency contacts ─────────────────────────────────────── */}
+      {/* Last on the page and headed more quietly than the sections above:
+          this is reference material a resident scans for, not something the
+          front page should lead with. The card treatment inside is
+          EmergencyContacts' own and is untouched — the numbers still carry
+          their own visual weight where it matters. */}
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold tracking-tight text-slate-600">
+          {lang === 'ne' ? 'आपतकालीन सम्पर्क' : 'Emergency Contacts'}
+        </h2>
+        <EmergencyContacts lang={lang} />
       </section>
     </div>
   )

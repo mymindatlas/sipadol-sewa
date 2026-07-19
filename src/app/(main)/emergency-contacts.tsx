@@ -69,7 +69,7 @@ export const EMERGENCY_CONTACTS: EmergencyContact[] = [
     icon: '🩺',
     label_ne: 'स्वास्थ्य चौकी',
     label_en: 'Health Post',
-    provider_ne: 'सिपादोल स्वास्थ्य चौकी',
+    provider_ne: 'सिपाडोल स्वास्थ्य चौकी',
     provider_en: 'Sipadol Health Post',
     numbers: [{ tel: '9841394658' }],
   },
