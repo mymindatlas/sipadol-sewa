@@ -5,6 +5,7 @@ import { CloudinaryImage } from '@/components/media/cloudinary-image'
 import { formatDateOnly, todayInKathmandu } from '@/lib/dates'
 import { getLang, localized, type Lang } from '@/lib/i18n'
 import { buildMetadata } from '@/lib/metadata'
+import { dateRange, lastDay, registrationBadge } from '@/lib/programs'
 import { createClient } from '@/lib/supabase/server'
 
 // §21 — public programme list. The .eq('is_published', true) states the
@@ -34,61 +35,6 @@ type ProgramRow = {
   end_date: string | null
   registration_open: boolean
   registration_deadline: string | null
-}
-
-/** The last day a programme occupies: its end, or its start if it is one day. */
-function lastDay(program: ProgramRow): string {
-  return program.end_date ?? program.start_date
-}
-
-// The badge answers "can I register?", not "is the event over?" — so the
-// labels name registration explicitly. `state` is the same answer in a form
-// the card can branch on, so the deadline line below cannot drift out of
-// agreement with the badge above it.
-type Badge = {
-  state: 'open' | 'upcoming' | 'closed'
-  label: string
-  className: string
-}
-
-// Mirrors program_is_open() for DISPLAY only (§13). The database function
-// remains the enforcement — a badge is never a gate, and the detail page's
-// registration will call the real thing.
-function registrationBadge(
-  program: ProgramRow,
-  today: string,
-  lang: Lang
-): Badge {
-  const deadlinePassed =
-    program.registration_deadline !== null &&
-    program.registration_deadline < today
-
-  if (program.registration_open && !deadlinePassed) {
-    return {
-      state: 'open',
-      label: lang === 'ne' ? 'दर्ता खुला' : 'Registration open',
-      className: 'bg-emerald-100 text-emerald-800',
-    }
-  }
-  if (program.start_date > today) {
-    return {
-      state: 'upcoming',
-      label: lang === 'ne' ? 'आगामी' : 'Upcoming',
-      className: 'bg-blue-100 text-blue-800',
-    }
-  }
-  return {
-    state: 'closed',
-    label: lang === 'ne' ? 'दर्ता बन्द' : 'Registration closed',
-    className: 'bg-slate-200 text-slate-600',
-  }
-}
-
-/** Localized dates: start, and "– end" only when the programme spans days. */
-function dateRange(program: ProgramRow, lang: Lang): string {
-  const start = formatDateOnly(program.start_date, lang)
-  if (!program.end_date) return start
-  return `${start} – ${formatDateOnly(program.end_date, lang)}`
 }
 
 const EXCERPT_LENGTH = 140

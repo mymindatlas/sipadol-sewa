@@ -5,8 +5,9 @@ import { cache } from 'react'
 
 import { CloudinaryImage } from '@/components/media/cloudinary-image'
 import { formatDateOnly, todayInKathmandu } from '@/lib/dates'
-import { getLang, localized, type Lang } from '@/lib/i18n'
+import { getLang, localized } from '@/lib/i18n'
 import { buildMetadata } from '@/lib/metadata'
+import { dateRange } from '@/lib/programs'
 import { createClient } from '@/lib/supabase/server'
 
 import { RegisterForm } from './register-form'
@@ -62,13 +63,6 @@ function excerpt(text: string): string {
   const collapsed = text.replace(/\s+/g, ' ').trim()
   if (collapsed.length <= EXCERPT_LENGTH) return collapsed
   return `${collapsed.slice(0, EXCERPT_LENGTH).trimEnd()}…`
-}
-
-/** Localized dates: start, and "– end" only when the programme spans days. */
-function dateRange(program: ProgramRow, lang: Lang): string {
-  const start = formatDateOnly(program.start_date, lang)
-  if (!program.end_date) return start
-  return `${start} – ${formatDateOnly(program.end_date, lang)}`
 }
 
 type Props = { params: Promise<{ id: string }> }
