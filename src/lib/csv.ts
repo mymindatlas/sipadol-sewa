@@ -9,7 +9,26 @@ export type CsvColumn = {
   header: string
 }
 
-export type CsvRow = Record<string, string | number | null | undefined>
+export type CsvValue = string | number | null | undefined
+
+export type CsvRow = Record<string, CsvValue>
+
+export type CsvOptions = {
+  /**
+   * Rows written ABOVE the column-header row — a title block naming what the
+   * file contains and when it was produced.
+   *
+   * Handled here rather than by concatenating strings at the call site for
+   * two reasons: the BOM has to stay the very first bytes of the file, and
+   * these rows must go through the same escaping as the data, since a
+   * programme title can contain a comma or Devanagari just as a resident's
+   * note can. Each entry is one row; an empty array is a blank spacer row.
+   *
+   * Ragged by design — a title row need not have as many fields as the table
+   * below it, which every spreadsheet handles.
+   */
+  leadingRows?: CsvValue[][]
+}
 
 /**
  * Excel does not sniff UTF-8. Without a byte-order mark it decodes a .csv as
@@ -59,7 +78,7 @@ function neutralizeFormula(value: string): string {
  * getting the "does this one need quoting?" test wrong for a comma, a
  * newline, or a quote that a resident typed into a note.
  */
-function escapeField(value: string | number | null | undefined): string {
+function escapeField(value: CsvValue): string {
   if (value === null || value === undefined) return '""'
   // Two layers, in this order. neutralizeFormula changes what the cell's
   // VALUE is; the quoting below changes how that value is WRITTEN into the
@@ -76,14 +95,24 @@ function escapeField(value: string | number | null | undefined): string {
  * A row missing a key contributes an empty field rather than shifting the
  * remaining columns left.
  */
-export function toCsv(rows: CsvRow[], columns: CsvColumn[]): string {
+export function toCsv(
+  rows: CsvRow[],
+  columns: CsvColumn[],
+  options: CsvOptions = {}
+): string {
+  // Escaped exactly like the data below them — see CsvOptions.leadingRows.
+  const leading = (options.leadingRows ?? []).map((row) =>
+    row.map((value) => escapeField(value)).join(',')
+  )
+
   const header = columns.map((column) => escapeField(column.header)).join(',')
 
   const body = rows.map((row) =>
     columns.map((column) => escapeField(row[column.key])).join(',')
   )
 
+  // The BOM stays the first bytes of the file, ahead of any title block.
   // CRLF: the line ending RFC 4180 specifies, and the one Excel is happiest
   // with on the Windows machines in the ward office.
-  return UTF8_BOM + [header, ...body].join('\r\n')
+  return UTF8_BOM + [...leading, header, ...body].join('\r\n')
 }
