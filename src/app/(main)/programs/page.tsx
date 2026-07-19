@@ -64,7 +64,15 @@ function lastDay(program: ProgramRow): string {
   return program.end_date ?? program.start_date
 }
 
-type Badge = { label: string; className: string }
+// The badge answers "can I register?", not "is the event over?" — so the
+// labels name registration explicitly. `state` is the same answer in a form
+// the card can branch on, so the deadline line below cannot drift out of
+// agreement with the badge above it.
+type Badge = {
+  state: 'open' | 'upcoming' | 'closed'
+  label: string
+  className: string
+}
 
 // Mirrors program_is_open() for DISPLAY only (§13). The database function
 // remains the enforcement — a badge is never a gate, and the detail page's
@@ -80,18 +88,21 @@ function registrationBadge(
 
   if (program.registration_open && !deadlinePassed) {
     return {
-      label: lang === 'ne' ? 'दर्ता खुला' : 'Open',
+      state: 'open',
+      label: lang === 'ne' ? 'दर्ता खुला' : 'Registration open',
       className: 'bg-emerald-100 text-emerald-800',
     }
   }
   if (program.start_date > today) {
     return {
+      state: 'upcoming',
       label: lang === 'ne' ? 'आगामी' : 'Upcoming',
       className: 'bg-blue-100 text-blue-800',
     }
   }
   return {
-    label: lang === 'ne' ? 'बन्द' : 'Closed',
+    state: 'closed',
+    label: lang === 'ne' ? 'दर्ता बन्द' : 'Registration closed',
     className: 'bg-slate-200 text-slate-600',
   }
 }
@@ -230,6 +241,17 @@ function ProgramGrid({
                 <span className="mt-1 block text-sm text-slate-500">
                   {dateRange(program, lang)}
                 </span>
+                {/* Only while registering is actually possible AND there is a
+                    date to act before. An open programme with no deadline
+                    takes signups until it starts, so there is nothing to
+                    announce; a closed or finished one would just be noise. */}
+                {badge.state === 'open' && program.registration_deadline && (
+                  <span className="mt-1 block text-sm font-medium text-emerald-700">
+                    {lang === 'ne'
+                      ? `दर्ता अन्तिम मिति: ${formatDateOnly(program.registration_deadline, lang)}`
+                      : `Register by: ${formatDateOnly(program.registration_deadline, lang)}`}
+                  </span>
+                )}
                 <span className="mt-2 block text-sm text-slate-600">
                   {excerpt(localized(program, 'description', lang))}
                 </span>
