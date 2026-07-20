@@ -317,7 +317,7 @@ export default async function AdminComplaintDetailPage({
             />
             <button
               type="submit"
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              className="rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800"
             >
               Save note
             </button>
@@ -333,7 +333,11 @@ export default async function AdminComplaintDetailPage({
             </p>
             <button
               type="submit"
-              className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              className={
+                complaint.is_published
+                  ? 'rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800 hover:bg-amber-100'
+                  : 'rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700'
+              }
             >
               {complaint.is_published ? 'Unpublish' : 'Publish'}
             </button>

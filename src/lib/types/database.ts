@@ -601,6 +601,21 @@ export type Database = {
         }
         Returns: undefined
       }
+      complaint_rate_ok: { Args: never; Returns: boolean }
+      complaint_stats: {
+        Args: never
+        Returns: {
+          action_required: number
+          active_total: number
+          closed: number
+          in_progress: number
+          received: number
+          resolved: number
+          resolved_pct: number
+          total: number
+          withdrawn: number
+        }[]
+      }
       current_role: {
         Args: never
         Returns: Database["public"]["Enums"]["user_role"]
@@ -608,6 +623,7 @@ export type Database = {
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
       next_complaint_ticket: { Args: never; Returns: string }
       program_is_open: { Args: { p_program_id: number }; Returns: boolean }
+      registration_count: { Args: never; Returns: number }
     }
     Enums: {
       complaint_status:
