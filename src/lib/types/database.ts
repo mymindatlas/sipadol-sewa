@@ -39,6 +39,154 @@ export type Database = {
   }
   public: {
     Tables: {
+      complaint_categories: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: number
+          is_active: boolean
+          name_en: string
+          name_ne: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: never
+          is_active?: boolean
+          name_en: string
+          name_ne: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: never
+          is_active?: boolean
+          name_en?: string
+          name_ne?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      complaint_status_events: {
+        Row: {
+          changed_by: string | null
+          complaint_id: number
+          created_at: string
+          id: number
+          note: string | null
+          status: Database["public"]["Enums"]["complaint_status"]
+        }
+        Insert: {
+          changed_by?: string | null
+          complaint_id: number
+          created_at?: string
+          id?: never
+          note?: string | null
+          status: Database["public"]["Enums"]["complaint_status"]
+        }
+        Update: {
+          changed_by?: string | null
+          complaint_id?: number
+          created_at?: string
+          id?: never
+          note?: string | null
+          status?: Database["public"]["Enums"]["complaint_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaint_status_events_changed_by_fkey"
+            columns: ["changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaint_status_events_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "complaints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      complaints: {
+        Row: {
+          category_id: number
+          created_at: string
+          description: string
+          id: number
+          is_published: boolean
+          location_text: string
+          photo_file: string | null
+          staff_note: string | null
+          status: Database["public"]["Enums"]["complaint_status"]
+          ticket_id: string
+          updated_at: string
+          user_id: string
+          withdrawal_reason: string | null
+          withdrawn_at: string | null
+          withdrawn_by: string | null
+        }
+        Insert: {
+          category_id: number
+          created_at?: string
+          description: string
+          id?: never
+          is_published?: boolean
+          location_text: string
+          photo_file?: string | null
+          staff_note?: string | null
+          status?: Database["public"]["Enums"]["complaint_status"]
+          ticket_id?: string
+          updated_at?: string
+          user_id?: string
+          withdrawal_reason?: string | null
+          withdrawn_at?: string | null
+          withdrawn_by?: string | null
+        }
+        Update: {
+          category_id?: number
+          created_at?: string
+          description?: string
+          id?: never
+          is_published?: boolean
+          location_text?: string
+          photo_file?: string | null
+          staff_note?: string | null
+          status?: Database["public"]["Enums"]["complaint_status"]
+          ticket_id?: string
+          updated_at?: string
+          user_id?: string
+          withdrawal_reason?: string | null
+          withdrawn_at?: string | null
+          withdrawn_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaints_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "complaint_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaints_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "complaints_withdrawn_by_fkey"
+            columns: ["withdrawn_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gallery_albums: {
         Row: {
           cover_photo_id: number | null
@@ -431,7 +579,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      complaints_public: {
+        Row: {
+          category_name_en: string | null
+          category_name_ne: string | null
+          created_at: string | null
+          description: string | null
+          location_text: string | null
+          status: Database["public"]["Enums"]["complaint_status"] | null
+          ticket_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_set_profile_role: {
@@ -447,6 +606,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["user_role"]
       }
       custom_access_token_hook: { Args: { event: Json }; Returns: Json }
+      next_complaint_ticket: { Args: never; Returns: string }
       program_is_open: { Args: { p_program_id: number }; Returns: boolean }
     }
     Enums: {
