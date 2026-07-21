@@ -78,7 +78,12 @@ export default async function ComplaintTrackerPage({
     .order('created_at', { ascending: false })
   if (activeFilter) listQuery = listQuery.eq('status', activeFilter)
 
-  const [lookupRes, listRes] = await Promise.all([
+  // getUser() decides ONLY the call-to-action's wording and target — logged-in
+  // residents get a "File a Complaint" link, guests get "Sign in to file". It
+  // never touches what data the page shows: the list and lookup below read the
+  // public view regardless of who (if anyone) is signed in.
+  const [userRes, lookupRes, listRes] = await Promise.all([
+    supabase.auth.getUser(),
     ticketQuery
       ? supabase
           .from('complaints_public')
@@ -89,6 +94,7 @@ export default async function ComplaintTrackerPage({
     listQuery,
   ])
 
+  const isLoggedIn = Boolean(userRes.data.user)
   const lookupResult = (lookupRes.data as PublicComplaint | null) ?? null
   const complaints = (listRes.data as PublicComplaint[] | null) ?? []
 
@@ -105,6 +111,39 @@ export default async function ComplaintTrackerPage({
             : 'These are complaints ward residents have filed and the ward has published. Names and photos are never shown on this page.'}
         </p>
       </header>
+
+      {/* ── Primary action · File a complaint ───────────────────────── */}
+      {/* The tracker is the complaints hub, so filing one has to be the loudest
+          thing on the page — a solid blue button that stands apart from the
+          outlined filter pills and white cards below. Its wording and target
+          depend on whether the visitor is signed in: a resident links straight
+          to the form; a guest is sent to /login first (and told why an account
+          is needed), rather than bouncing off the auth gate on /complaints/new
+          with no explanation. */}
+      <div className="flex flex-col gap-2 rounded-2xl border border-blue-100 bg-blue-50/60 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <p className="text-sm leading-relaxed text-slate-700">
+          {isLoggedIn
+            ? lang === 'ne'
+              ? 'वडामा समस्या छ? यहाँ गुनासो दर्ता गर्नुहोस्।'
+              : 'Have an issue in the ward? File a complaint here.'
+            : lang === 'ne'
+              ? 'गुनासो दर्ता गर्न वडा खाता चाहिन्छ — ताकि तपाईंले आफ्नो गुनासोको प्रगति हेर्न सक्नुहोस्।'
+              : 'You need a ward account to file a complaint — so you can track its progress.'}
+        </p>
+        <Link
+          href={isLoggedIn ? '/complaints/new' : '/login'}
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300"
+        >
+          <span aria-hidden>📬</span>
+          {isLoggedIn
+            ? lang === 'ne'
+              ? 'गुनासो दर्ता गर्नुहोस्'
+              : 'File a Complaint'
+            : lang === 'ne'
+              ? 'गुनासो दर्ता गर्न साइन इन गर्नुहोस्'
+              : 'Sign in to file a complaint'}
+        </Link>
+      </div>
 
       {/* ── Part A · Ticket lookup ──────────────────────────────────── */}
       <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
