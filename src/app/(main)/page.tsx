@@ -254,18 +254,20 @@ export default async function HomePage() {
                 href={card.href}
                 className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-4 transition hover:border-blue-300 hover:bg-blue-50/50"
               >
-                <span className="flex items-center gap-2.5">
-                  <span
-                    aria-hidden
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl ${ACCENT_CHIP[card.accent]}`}
-                  >
-                    {card.icon}
-                  </span>
-                  <span className="min-w-0 font-semibold leading-tight text-slate-900">
-                    {lang === 'ne' ? card.label_ne : card.label_en}
-                  </span>
+                {/* Stacked: the icon chip sits ABOVE the label so the label
+                    gets the full card width — long ones like "Representatives"
+                    and "About & Contact" no longer overflow or wrap awkwardly
+                    at phone width. */}
+                <span
+                  aria-hidden
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xl ${ACCENT_CHIP[card.accent]}`}
+                >
+                  {card.icon}
                 </span>
-                <span className="mt-2 block text-xs leading-snug text-slate-500">
+                <span className="mt-2.5 block font-semibold leading-tight text-slate-900">
+                  {lang === 'ne' ? card.label_ne : card.label_en}
+                </span>
+                <span className="mt-1 block text-xs leading-snug text-slate-500">
                   {lang === 'ne' ? card.hint_ne : card.hint_en}
                 </span>
               </Link>

@@ -87,7 +87,10 @@ function telHref(tel: string): string {
 
 export function EmergencyContacts({ lang }: { lang: Lang }) {
   return (
-    <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    // Mobile: a tight single-column list — each contact is one dense row, so
+    // six of them read at a glance instead of scrolling nearly a screen each.
+    // md+ keeps the roomier three-column card grid, which has space to spare.
+    <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
       {EMERGENCY_CONTACTS.map((contact) => {
         const label = lang === 'ne' ? contact.label_ne : contact.label_en
         const secondary = lang === 'ne' ? contact.label_en : contact.label_ne
@@ -98,30 +101,39 @@ export function EmergencyContacts({ lang }: { lang: Lang }) {
         return (
           <li
             key={contact.label_en}
-            className="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-red-200"
+            className="rounded-xl border border-slate-200 bg-white p-3 transition hover:border-red-200 sm:p-4"
           >
-            <div className="flex items-start gap-3">
-              <span aria-hidden className="text-2xl leading-none">
+            <div className="flex items-center gap-3 sm:items-start">
+              <span aria-hidden className="text-xl leading-none sm:text-2xl">
                 {contact.icon}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="font-semibold leading-tight text-slate-900">
-                  {label}
-                </p>
-                <p className="text-xs text-slate-500">{secondary}</p>
+                {/* On mobile the label and primary number share one line
+                    (label left, number right); on sm+ the number drops below
+                    the label as before. */}
+                <div className="flex items-baseline justify-between gap-3 sm:block">
+                  <div className="min-w-0">
+                    <p className="font-semibold leading-tight text-slate-900">
+                      {label}
+                    </p>
+                    <p className="text-xs text-slate-500">{secondary}</p>
 
-                {provider && (
-                  <p className="mt-1 text-xs text-slate-500">{provider}</p>
-                )}
+                    {provider && (
+                      <p className="mt-0.5 text-xs text-slate-500 sm:mt-1">
+                        {provider}
+                      </p>
+                    )}
+                  </div>
 
-                {/* The primary number is the one thing on this card that has
-                    to be findable at a glance and hittable with a thumb. */}
-                <a
-                  href={telHref(primary.tel)}
-                  className="mt-2 block text-lg font-bold tracking-tight text-red-700 hover:underline"
-                >
-                  {primary.tel}
-                </a>
+                  {/* The primary number is the one thing that has to be
+                      findable at a glance and hittable with a thumb. */}
+                  <a
+                    href={telHref(primary.tel)}
+                    className="shrink-0 whitespace-nowrap text-base font-bold tracking-tight text-red-700 hover:underline sm:mt-2 sm:block sm:text-lg"
+                  >
+                    {primary.tel}
+                  </a>
+                </div>
                 {(primary.note_ne || primary.note_en) && (
                   <p className="text-xs text-slate-500">
                     {lang === 'ne' ? primary.note_ne : primary.note_en}
@@ -129,7 +141,7 @@ export function EmergencyContacts({ lang }: { lang: Lang }) {
                 )}
 
                 {alternates.length > 0 && (
-                  <div className="mt-1.5 space-y-0.5 border-t border-slate-100 pt-1.5">
+                  <div className="mt-1 space-y-0.5 border-t border-slate-100 pt-1 sm:mt-1.5 sm:pt-1.5">
                     {alternates.map((alternate) => (
                       <a
                         key={alternate.tel}
